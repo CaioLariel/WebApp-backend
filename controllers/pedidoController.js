@@ -9,16 +9,15 @@ exports.getPedidos = (req, res) => {
 
 exports.confirmarEntrega = (req, res) => {
   const { codigo } = req.body;  
-  const pedidoId = req.params.id;  // O ID do pedido a ser confirmado
+  const pedidoId = req.params.id; 
 
-  // Consultar o pedido no banco de dados pelo ID
   pedidoModel.getPedidoPorId(pedidoId)
       .then(pedido => {
           if (!pedido) {
               return res.status(404).json({ message: 'Pedido não encontrado' });
           }
 
-          // Verificar se o código de entrega enviado é igual ao armazenado no banco
+    
           if (pedido.codigo_entrega !== codigo) {
               return res.status(400).json({ message: 'Código incorreto' });
           }

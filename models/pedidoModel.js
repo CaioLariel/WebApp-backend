@@ -1,5 +1,17 @@
 const db = require('../config/db');  // Importa a conexão com o banco
 
+exports.getPedidos = () => {
+    return new Promise((resolve, reject) => {
+        const query = 'SELECT * FROM pedidos';
+        db.query(query, (err, results) => {
+            if (err) {
+                reject('Erro ao buscar pedidos: ' + err);
+            } else {
+                resolve(results); // Retorna a lista de pedidos
+            }
+        });
+    });
+};
 // Função para pegar um pedido pelo ID
 exports.getPedidoPorId = (pedidoId) => {
     return new Promise((resolve, reject) => {
