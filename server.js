@@ -13,7 +13,7 @@ app.use(express.json());
 // Rotas
 app.use('/api', pedidoRoutes);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 8080;  // Railway define a porta dinamicamente
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
