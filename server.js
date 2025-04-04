@@ -4,14 +4,14 @@ const express = require('express');
 const cors = require('cors');
 const pedidoRoutes = require('./routes/pedidoRoutes');
 
-const app = express();
-const cors = require('cors');
+const app = express(); // 🔥 Criar a instância do Express
 
 app.use(cors({
     origin: '*',  
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type']
 }));
+
 app.use(express.json());
 
 // Rotas
