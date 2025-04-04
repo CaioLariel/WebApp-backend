@@ -12,6 +12,6 @@ router.post('/criarPedido', pedidoController.criarPedido);
 router.post('/:id/confirmar', pedidoController.confirmarEntrega);
 
 // Rota para alterar o status de um pedido
-router.put('/:id/status', pedidoController.alterarStatus);
+router.put('/:id/alteraStatus', pedidoController.alterarStatus);
 
 module.exports = router;

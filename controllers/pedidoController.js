@@ -1,50 +1,61 @@
-const pedidoModel = require('../models/pedidoModel');
 const db = require('../config/db');
 
-// Função para pegar todos os pedidos
 exports.getPedidos = (req, res) => {
-    pedidoModel.getPedidos()
-        .then(pedidos => res.status(200).json(pedidos))
-        .catch(err => res.status(500).json({ message: 'Erro ao carregar pedidos', error: err }));
+    const query = 'SELECT * FROM pedidos';
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: 'Erro ao carregar pedidos', error: err });
+        }
+        res.status(200).json(results);
+    });
 };
 
 exports.confirmarEntrega = (req, res) => {
-  const { codigo } = req.body;  
-  const pedidoId = req.params.id; 
+    const { codigo } = req.body;
+    const pedidoId = req.params.id;
 
-  pedidoModel.getPedidoPorId(pedidoId)
-      .then(pedido => {
-          if (!pedido) {
-              return res.status(404).json({ message: 'Pedido não encontrado' });
-          }
+    const query = 'SELECT * FROM pedidos WHERE id = ?';
+    db.query(query, [pedidoId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: 'Erro ao buscar pedido', error: err });
+        }
 
-    
-          if (pedido.codigo_entrega !== codigo) {
-              return res.status(400).json({ message: 'Código incorreto' });
-          }
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Pedido não encontrado' });
+        }
 
-          // Caso o código esteja correto, confirmar a entrega no banco de dados
-          pedidoModel.confirmarEntrega(pedidoId)
-              .then(() => {
-                  res.status(200).json({ message: 'Entrega confirmada com sucesso!' });
-              })
-              .catch(err => {
-                  res.status(500).json({ message: 'Erro ao confirmar entrega', error: err });
-              });
-      })
-      .catch(err => {
-          res.status(500).json({ message: 'Erro ao buscar pedido', error: err });
-      });
+        const pedido = results[0];
+
+        if (pedido.codigo_entrega !== codigo) {
+            return res.status(400).json({ message: 'Código incorreto' });
+        }
+
+        const updateQuery = 'UPDATE pedidos SET status = "finalizado" WHERE id = ?';
+        db.query(updateQuery, [pedidoId], (err) => {
+            if (err) {
+                return res.status(500).json({ message: 'Erro ao confirmar entrega', error: err });
+            }
+            res.status(200).json({ message: 'Entrega confirmada com sucesso!' });
+        });
+    });
 };
 
-// Função para alterar o status de um pedido
 exports.alterarStatus = (req, res) => {
     const pedidoId = req.params.id;
     const { status } = req.body;
 
-    pedidoModel.alterarStatus(pedidoId, status)
-        .then(() => res.status(200).json({ message: 'Status alterado com sucesso!' }))
-        .catch(err => res.status(500).json({ message: 'Erro ao alterar status', error: err }));
+    const statusesPermitidos = ['em espera', 'em preparo', 'finalizado'];
+    if (!statusesPermitidos.includes(status)) {
+        return res.status(400).json({ message: 'Status inválido. Os status válidos são: em espera, em preparo, finalizado.' });
+    }
+
+    const query = 'UPDATE pedidos SET status = ? WHERE id = ?';
+    db.query(query, [status, pedidoId], (err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Erro ao alterar status', error: err });
+        }
+        res.status(200).json({ message: 'Status alterado com sucesso!' });
+    });
 };
 
 const gerarCodigoConfirmacao = () => {
@@ -53,7 +64,7 @@ const gerarCodigoConfirmacao = () => {
 
 exports.criarPedido = (req, res) => {
     const { nome_cliente, itens } = req.body;
-    
+
     if (!itens || itens.length === 0) {
         return res.status(400).json({ message: "O pedido deve conter pelo menos um item." });
     }
