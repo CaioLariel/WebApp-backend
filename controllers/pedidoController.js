@@ -1,4 +1,5 @@
 const pedidoModel = require('../models/pedidoModel');
+const db = require('../config/db');
 
 // Função para pegar todos os pedidos
 exports.getPedidos = (req, res) => {
@@ -46,17 +47,32 @@ exports.alterarStatus = (req, res) => {
         .catch(err => res.status(500).json({ message: 'Erro ao alterar status', error: err }));
 };
 
-// Função para criar um pedido
-exports.criarPedido = (req, res) => {
-    const { nome_cliente, nome_produto, quantidade, valor } = req.body;
+const gerarCodigoConfirmacao = () => {
+    return Math.random().toString(36).substr(2, 4).toUpperCase();
+};
 
-    pedidoModel.criarPedido(nome_cliente, nome_produto, quantidade, valor)
-        .then(({ pedidoId, codigo_entrega }) => {
-            res.status(201).json({
-                message: 'Pedido criado com sucesso!',
-                pedidoId,
-                codigo_entrega  // Retorna o código de entrega gerado
-            });
-        })
-        .catch(err => res.status(500).json({ message: 'Erro ao criar pedido', error: err }));
+exports.criarPedido = (req, res) => {
+    const { nome_cliente, itens } = req.body;
+    
+    if (!itens || itens.length === 0) {
+        return res.status(400).json({ message: "O pedido deve conter pelo menos um item." });
+    }
+
+    const valor_total = itens.reduce((total, item) => total + (item.quantidade * item.valor), 0);
+    const codigo_entrega = gerarCodigoConfirmacao();
+
+    const query = `INSERT INTO pedidos (nome_cliente, itens, valor_total, status, codigo_entrega) 
+                   VALUES (?, ?, ?, 'em espera', ?)`;
+
+    db.query(query, [nome_cliente, JSON.stringify(itens), valor_total, codigo_entrega], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: "Erro ao criar pedido", error: err });
+        }
+
+        res.status(201).json({
+            message: "Pedido criado com sucesso!",
+            pedidoId: results.insertId,
+            codigo_entrega
+        });
+    });
 };

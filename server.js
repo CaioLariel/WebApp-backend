@@ -10,8 +10,8 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());  // Habilitar CORS
-app.use(express.json());  // Habilitar parsing de JSON
+app.use(cors());  
+app.use(express.json());  
 
 // Rotas
 app.use('/api', pedidoRoutes);
