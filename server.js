@@ -1,10 +1,10 @@
-require('dotenv').config(); // Carrega as variáveis do .env no início
+require('dotenv').config(); 
 
 const express = require('express');
 const cors = require('cors');
 const pedidoRoutes = require('./routes/pedidoRoutes');
-
-const app = express(); // 🔥 Criar a instância do Express
+const itemRoutes = require('./routes/itemRoutes');
+const app = express(); 
 
 app.use(cors({
     origin: '*',  
@@ -16,6 +16,8 @@ app.use(express.json());
 
 // Rotas
 app.use('/api', pedidoRoutes);
+app.use('/api', itemRoutes);
+
 
 const PORT = process.env.PORT || 3000;  // Railway define a porta dinamicamente
 app.listen(PORT, '0.0.0.0', () => {
