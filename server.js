@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const pedidoRoutes = require('./routes/pedidoRoutes');
-const itemRoutes = require('./routes/itemRoutes');
+const tarefasRoutes = require('./routes/tarefasRoutes');
 const app = express(); 
 
 app.use(cors({
@@ -16,7 +16,7 @@ app.use(express.json());
 
 // Rotas
 app.use('/api', pedidoRoutes);
-app.use('/api', itemRoutes);
+app.use('/api', tarefasRoutes);
 
 
 const PORT = process.env.PORT || 3000;  // Railway define a porta dinamicamente
